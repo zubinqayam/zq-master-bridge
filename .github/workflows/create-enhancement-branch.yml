@@ -1,0 +1,33 @@
+name: Create Enhancement Lab Branch
+
+# This workflow creates the `version/Enhancement-lab-` branch from main
+# the first time code is pushed to main (i.e. after the initial V2 PR is merged).
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  create-enhancement-branch:
+    name: Ensure version/Enhancement-lab- branch exists
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create branch if it does not exist
+        run: |
+          BRANCH="version/Enhancement-lab-"
+          if git ls-remote --exit-code --heads origin "$BRANCH"; then
+            echo "Branch '$BRANCH' already exists — skipping."
+          else
+            git checkout -b "$BRANCH"
+            git push origin "$BRANCH"
+            echo "Branch '$BRANCH' created and pushed."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
