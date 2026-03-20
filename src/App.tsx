@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 
 interface Message {
   role: "user" | "assistant";
@@ -25,10 +26,7 @@ export default function App() {
     setLoading(true);
 
     try {
-      // @ts-expect-error Tauri global injected at runtime
-      const response: string = await window.__TAURI__.invoke("chat", {
-        message: text,
-      });
+      const response = await invoke<string>("chat", { message: text });
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: response },
