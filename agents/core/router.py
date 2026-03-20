@@ -62,9 +62,37 @@ async def summarize_agent(task: str, _ctx: dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 
 
+def get_heartbeat_interval() -> float:
+    """Read ZQ_HEARTBEAT_INTERVAL from the environment with validation.
+
+    Falls back to 5.0 seconds if the variable is unset, invalid, or non-positive.
+    """
+    raw = os.getenv("ZQ_HEARTBEAT_INTERVAL")
+    default = 5.0
+    if not raw:
+        return default
+    try:
+        value = float(raw)
+        if value <= 0:
+            logger.warning(
+                "ZQ_HEARTBEAT_INTERVAL must be positive; got %r. Falling back to %s.",
+                raw,
+                default,
+            )
+            return default
+        return value
+    except (TypeError, ValueError):
+        logger.warning(
+            "Invalid ZQ_HEARTBEAT_INTERVAL %r; expected a float. Falling back to %s.",
+            raw,
+            default,
+        )
+        return default
+
+
 @dataclass
 class RouterConfig:
-    heartbeat_interval: float = 5.0
+    heartbeat_interval: float = field(default_factory=get_heartbeat_interval)
     max_concurrency: int = int(os.getenv("ZQ_MAX_CONCURRENCY", "16"))
 
 
