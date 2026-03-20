@@ -20,15 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
-
       - name: Install Node dependencies
         run: npm ci
-
       - name: Type-check
         run: npx tsc --noEmit
 
@@ -66,11 +63,12 @@ jobs:
             file \
             libssl-dev \
             libayatana-appindicator3-dev \
-            librsvg2-dev
+            librsvg2-dev \
+            imagemagick
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - uses: dtolnay/rust-toolchain@stable
@@ -83,6 +81,123 @@ jobs:
 
       - name: Install Node dependencies
         run: npm ci
+
+      - name: Generate Tauri icons (Linux / macOS)
+        if: matrix.platform != 'windows-latest'
+        run: |
+          mkdir -p src-tauri/icons
+          python3 - <<'PYEOF'
+          import struct, zlib, os
+
+          def make_png(w, h, r=69, g=137, b=210):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack('>I', len(data)) + name + data + struct.pack('>I', c)
+              ihdr = struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)
+              raw = b''.join(b'\x00' + bytes([r, g, b] * w) for _ in range(h))
+              idat = zlib.compress(raw)
+              return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr) + chunk(b'IDAT', idat) + chunk(b'IEND', b'')
+
+          icons = {
+              'src-tauri/icons/32x32.png':      make_png(32, 32),
+              'src-tauri/icons/128x128.png':    make_png(128, 128),
+              'src-tauri/icons/128x128@2x.png': make_png(256, 256),
+          }
+          for path, data in icons.items():
+              with open(path, 'wb') as f:
+                  f.write(data)
+          print("PNG icons written.")
+          PYEOF
+          # icon.icns (macOS) – single-image ICNS with 128x128 PNG
+          python3 - <<'PYEOF'
+          import struct, zlib
+
+          def make_png(w, h, r=69, g=137, b=210):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack('>I', len(data)) + name + data + struct.pack('>I', c)
+              ihdr = struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)
+              raw = b''.join(b'\x00' + bytes([r, g, b] * w) for _ in range(h))
+              idat = zlib.compress(raw)
+              return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr) + chunk(b'IDAT', idat) + chunk(b'IEND', b'')
+
+          png128 = make_png(128, 128)
+          icon_type = b'ic07'   # 128x128 PNG
+          entry = icon_type + struct.pack('>I', 8 + len(png128)) + png128
+          total = 8 + len(entry)
+          icns = b'icns' + struct.pack('>I', total) + entry
+          with open('src-tauri/icons/icon.icns', 'wb') as f:
+              f.write(icns)
+          print("icon.icns written.")
+          PYEOF
+          # icon.ico – Windows ICO with 32x32 embedded PNG
+          python3 - <<'PYEOF'
+          import struct, zlib
+
+          def make_png(w, h, r=69, g=137, b=210):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack('>I', len(data)) + name + data + struct.pack('>I', c)
+              ihdr = struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)
+              raw = b''.join(b'\x00' + bytes([r, g, b] * w) for _ in range(h))
+              idat = zlib.compress(raw)
+              return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr) + chunk(b'IDAT', idat) + chunk(b'IEND', b'')
+
+          png = make_png(32, 32)
+          # ICO header: reserved=0, type=1 (icon), count=1
+          header = struct.pack('<HHH', 0, 1, 1)
+          # Directory entry: w, h, colors, reserved, planes, bit_count, size, offset
+          offset = 6 + 16
+          entry = struct.pack('<BBBBHHII', 32, 32, 0, 0, 1, 32, len(png), offset)
+          with open('src-tauri/icons/icon.ico', 'wb') as f:
+              f.write(header + entry + png)
+          print("icon.ico written.")
+          PYEOF
+
+      - name: Generate Tauri icons (Windows)
+        if: matrix.platform == 'windows-latest'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path src-tauri/icons | Out-Null
+          $script = @'
+          import struct, zlib, os
+
+          def make_png(w, h, r=69, g=137, b=210):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack(">I", len(data)) + name + data + struct.pack(">I", c)
+              ihdr = struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)
+              raw = b"".join(b"\x00" + bytes([r, g, b] * w) for _ in range(h))
+              idat = zlib.compress(raw)
+              return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", idat) + chunk(b"IEND", b"")
+
+          icons = {
+              "src-tauri/icons/32x32.png":      make_png(32, 32),
+              "src-tauri/icons/128x128.png":    make_png(128, 128),
+              "src-tauri/icons/128x128@2x.png": make_png(256, 256),
+          }
+          for path, data in icons.items():
+              with open(path, "wb") as f:
+                  f.write(data)
+
+          png128 = make_png(128, 128)
+          icon_type = b"ic07"
+          entry = icon_type + struct.pack(">I", 8 + len(png128)) + png128
+          total = 8 + len(entry)
+          icns = b"icns" + struct.pack(">I", total) + entry
+          with open("src-tauri/icons/icon.icns", "wb") as f:
+              f.write(icns)
+
+          png = make_png(32, 32)
+          header = struct.pack("<HHH", 0, 1, 1)
+          offset = 6 + 16
+          entry = struct.pack("<BBBBHHII", 32, 32, 0, 0, 1, 32, len(png), offset)
+          with open("src-tauri/icons/icon.ico", "wb") as f:
+              f.write(header + entry + png)
+
+          print("All icons written.")
+          '@
+          python -c $script
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
@@ -103,13 +218,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install ruff
         run: pip install ruff
-
       - name: Lint agents/
         run: ruff check agents/
