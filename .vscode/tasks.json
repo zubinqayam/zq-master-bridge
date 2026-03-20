@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dev: Start Vite + Tauri",
+      "type": "shell",
+      "command": "npm run tauri:dev",
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build: Tauri Release",
+      "type": "shell",
+      "command": "npm run tauri:build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "Frontend: Vite Dev Server",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Agents: Start Router",
+      "type": "shell",
+      "command": "python -m agents.core.router",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Database: Apply Schema",
+      "type": "shell",
+      "command": "sqlite3 zq.db < database/schema.sql",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install: Node dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

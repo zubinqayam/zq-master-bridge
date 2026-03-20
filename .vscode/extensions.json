@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "tauri-apps.tauri-vscode",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-python.python",
+    "alexcvzz.vscode-sqlite",
+    "yoavbls.pretty-ts-errors"
+  ]
+}
