@@ -2,28 +2,28 @@ name: Build & Release
 
 on:
   push:
-    branches: [main]
     tags:
       - "v*.*.*"
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # ------------------------------------------------------------------
-  # Frontend type-check (fast gate)
+  # Frontend type-check (gate for release builds)
   # ------------------------------------------------------------------
   typecheck:
     name: TypeScript type-check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - name: Install Node dependencies
@@ -70,12 +70,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          # If you only care about Apple Silicon for now, keep just aarch64.
+          toolchain: stable
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -89,18 +91,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
-          releaseName: "ZQ Master Bridge ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}"
+          tagName: ${{ github.ref_name }}
+          releaseName: "ZQ Master Bridge ${{ github.ref_name }}"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
 
   # ------------------------------------------------------------------
-  # Python agent sidecar checks
+  # Python agent sidecar checks (optional release gate)
   # ------------------------------------------------------------------
   python-lint:
     name: Python agent lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    needs: typecheck
     steps:
       - uses: actions/checkout@v4
 
