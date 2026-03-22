@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: "24"
       - name: Install Node dependencies
-        run: npm ci
+        run: npm install
       - name: Type-check
         run: npx tsc --noEmit
   python-lint:
