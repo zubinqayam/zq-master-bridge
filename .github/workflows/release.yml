@@ -2,33 +2,30 @@ name: Build & Release
 
 on:
   push:
-    branches: [main]
     tags:
       - "v*.*.*"
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # ------------------------------------------------------------------
-  # Frontend type-check (fast gate)
+  # Frontend type-check (gate for release builds)
   # ------------------------------------------------------------------
   typecheck:
     name: TypeScript type-check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
-
       - name: Install Node dependencies
         run: npm ci
-
       - name: Type-check
         run: npx tsc --noEmit
 
@@ -70,12 +67,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          # If you only care about Apple Silicon for now, keep just aarch64.
+          toolchain: stable
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -84,32 +83,78 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
+      - name: Generate Tauri icons
+        run: |
+          python3 - <<'PYEOF'
+          import struct, zlib, os
+
+          def make_rgba_png(w, h, r=69, g=137, b=210, a=255):
+              def chunk(name, data):
+                  c = zlib.crc32(name + data) & 0xffffffff
+                  return struct.pack('>I', len(data)) + name + data + struct.pack('>I', c)
+              ihdr = struct.pack('>IIBBBBB', w, h, 8, 6, 0, 0, 0)
+              raw = b''.join(b'\x00' + bytes([r, g, b, a] * w) for _ in range(h))
+              idat = zlib.compress(raw)
+              return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr) + chunk(b'IDAT', idat) + chunk(b'IEND', b'')
+
+          os.makedirs('src-tauri/icons', exist_ok=True)
+
+          sizes = [
+              (32, 32, '32x32.png'),
+              (128, 128, '128x128.png'),
+              (256, 256, '128x128@2x.png'),
+              (512, 512, 'icon.png'),
+          ]
+          for w, h, name in sizes:
+              with open(f'src-tauri/icons/{name}', 'wb') as f:
+                  f.write(make_rgba_png(w, h))
+
+          # Generate icon.ico (required for Windows builds)
+          ico_sizes = [16, 32, 48, 256]
+          png_list = [(s, make_rgba_png(s, s)) for s in ico_sizes]
+          num = len(png_list)
+          data_offset = 6 + 16 * num
+          header = struct.pack('<HHH', 0, 1, num)
+          dirs = b''
+          imgs = b''
+          off = data_offset
+          for s, data in png_list:
+              w = 0 if s == 256 else s
+              h = 0 if s == 256 else s
+              dirs += struct.pack('<BBBBHHII', w, h, 0, 0, 1, 32, len(data), off)
+              imgs += data
+              off += len(data)
+          with open('src-tauri/icons/icon.ico', 'wb') as f:
+              f.write(header + dirs + imgs)
+
+          print('All icons (PNG + ICO) generated successfully.')
+          PYEOF
+        shell: bash
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
-          releaseName: "ZQ Master Bridge ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}"
+          tagName: ${{ github.ref_name }}
+          releaseName: "ZQ Master Bridge ${{ github.ref_name }}"
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
 
   # ------------------------------------------------------------------
-  # Python agent sidecar checks
+  # Python agent sidecar checks (optional release gate)
   # ------------------------------------------------------------------
   python-lint:
     name: Python agent lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    needs: typecheck
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install ruff
         run: pip install ruff
-
       - name: Lint agents/
         run: ruff check agents/
