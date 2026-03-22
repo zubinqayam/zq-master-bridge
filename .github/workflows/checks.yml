@@ -15,30 +15,22 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: "npm"
-
       - name: Install Node dependencies
         run: npm ci
-
       - name: Type-check
         run: npx tsc --noEmit
-
   python-lint:
     name: Python agent lint
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Install ruff
         run: pip install ruff
-
       - name: Lint agents/
         run: ruff check agents/
