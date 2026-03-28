@@ -1,12 +1,7 @@
+// Tauri v2 handles all Windows resource embedding (VERSIONINFO, icon,
+// manifest) automatically via tauri-build. Do NOT add winres or any
+// other resource compiler here - it causes duplicate VERSIONINFO and
+// a fatal LNK1123 linker error.
 fn main() {
-    #[cfg(target_os = "windows")]
-    {
-        let mut res = winres::WindowsResource::new();
-        res.set_icon("icons/icon.ico");
-        res.set("ProductName", "ZQ Master Bridge");
-        res.set("FileDescription", "ZQ Control Room — local-first AI assistant");
-        res.set("LegalCopyright", "Copyright © 2026 Zubin Qayam");
-        res.compile().unwrap();
-    }
     tauri_build::build()
 }
