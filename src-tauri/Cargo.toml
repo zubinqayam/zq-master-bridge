@@ -13,6 +13,9 @@ name = "zq-master-bridge"
 path = "src/main.rs"
 
 [build-dependencies]
+# tauri-build handles all Windows resource embedding (VERSIONINFO, icon,
+# manifest) automatically. Do NOT add winres here - it causes a duplicate
+# VERSIONINFO resource and a fatal LNK1123 linker error.
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
@@ -26,6 +29,3 @@ codegen-units = 1
 lto = true
 opt-level = "s"
 strip = true
-
-[target.'cfg(windows)'.build-dependencies]
-winres = "0.1"
