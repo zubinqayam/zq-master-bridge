@@ -44,7 +44,7 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────────
   # 3. Windows .exe / NSIS installer  <- ONLY RELEASE TARGET
-  # This is a Windows-only app (NSIS + MSI bundles).
+  # This is a Windows-only app (NSIS installer bundle only).
   # Linux and macOS builds are intentionally excluded.
   # ─────────────────────────────────────────────────────────────────
   build-windows:
