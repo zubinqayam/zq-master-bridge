@@ -6,11 +6,13 @@
 # USAGE (run from repo root in PowerShell):
 #   .\scripts\build-and-install.ps1
 #
-# Or from VS Code: Terminal > Run Task > "ZQ: FULL PIPELINE"
+# Or trigger via VS Code: Terminal > Run Task >
+#   "ZQ: FULL PIPELINE (Clone to EXE Install)"
 #
-# This script covers every step from cloning the repo all the
-# way to silently installing the final Windows .exe on the
-# current machine. Each phase is clearly commented.
+# This script handles every step from cloning the repo
+# to silently installing the final Windows .exe.
+# Each phase is clearly commented so you know exactly
+# what is happening at every stage.
 # ==============================================================
 
 # Stop immediately on any unhandled error
@@ -25,13 +27,15 @@ Write-Host "========================================`n" -ForegroundColor Cyan
 # Clones zq-master-bridge from GitHub into the current directory.
 # If the repo was already cloned (i.e. .git folder exists),
 # this phase is safely skipped.
+# If the repo was already cloned (.git folder exists) it pulls
+# the latest changes from main instead.
 # --------------------------------------------------------------
 Write-Host "[PHASE 1] Cloning repository..." -ForegroundColor Yellow
 if (-Not (Test-Path ".git")) {
     git clone https://github.com/zubinqayam/zq-master-bridge.git .
     Write-Host "  Cloned successfully." -ForegroundColor Green
 } else {
-    Write-Host "  Already cloned. Pulling latest changes..." -ForegroundColor Gray
+    Write-Host "  Already cloned - pulling latest changes..." -ForegroundColor Gray
     git pull origin main
 }
 
@@ -112,53 +116,64 @@ pyinstaller `
     --name zq-agent-router `
     --clean `
     agents/core/router.py
-Write-Host "  Python agent bundled to src-tauri/resources/zq-agent-router.exe" -ForegroundColor Green
+Write-Host "  [OK] Agent EXE: src-tauri/resources/zq-agent-router.exe" -ForegroundColor Green
 
 # --------------------------------------------------------------
-# PHASE 7 - BUILD WINDOWS INSTALLER (.EXE)
-# Compiles the full app:
-#   - React 19 UI (Vite)
-#   - Rust/Tauri native backend
-#   - NSIS installer wrapper
-# Output: src-tauri/target/release/bundle/nsis/*.exe
-# This step takes the longest (5-15 min on first run).
+# PHASE 7 - BUILD THE WINDOWS INSTALLER EXE (NSIS)
+# This is the main Tauri build step. It:
+#   1. Compiles the React 19 + Vite frontend
+#   2. Compiles the Rust/Tauri backend (src-tauri/)
+#   3. Bundles everything into an NSIS Windows installer
+# Output location:
+#   src-tauri/target/release/bundle/nsis/*.exe
+# NOTE: First run takes 5-15 min (full Rust compile).
+#       Subsequent runs are faster (incremental).
 # --------------------------------------------------------------
 Write-Host "`n[PHASE 7] Building Windows EXE installer (NSIS)..." -ForegroundColor Yellow
-Write-Host "  This may take 5-15 minutes on first run (Rust compile)." -ForegroundColor Gray
+Write-Host "  (First run: 5-15 min. Subsequent runs: faster.)" -ForegroundColor Gray
 npm run tauri:build -- --bundles nsis
-Write-Host "  Build complete." -ForegroundColor Green
+Write-Host "  [OK] Build complete." -ForegroundColor Green
 
 # --------------------------------------------------------------
 # PHASE 8 - LOCATE THE BUILT EXE
-# Searches for the NSIS installer output in the bundle folder.
-# Prints its path and file size for confirmation.
+# Searches the Tauri bundle output directory for the NSIS .exe.
+# Prints the full path and file size so you can verify it.
+# Exits with error if no EXE is found (means build failed).
 # --------------------------------------------------------------
 Write-Host "`n[PHASE 8] Locating built installer..." -ForegroundColor Yellow
-$exeFiles = Get-ChildItem -Recurse -Path "src-tauri/target/release/bundle/nsis" -Filter "*.exe" -ErrorAction SilentlyContinue
+$exeFiles = Get-ChildItem -Recurse `
+    -Path "src-tauri/target/release/bundle/nsis" `
+    -Filter "*.exe" `
+    -ErrorAction SilentlyContinue
+
 if (-Not $exeFiles) {
-    Write-Host "  ERROR: No EXE found in bundle output. Check build logs." -ForegroundColor Red
+    Write-Host "  ERROR: No EXE found. Check Tauri build output above." -ForegroundColor Red
     exit 1
 }
+
 $installer = $exeFiles | Select-Object -First 1
-$sizeMB = [math]::Round($installer.Length / 1MB, 2)
-Write-Host "  Found: $($installer.FullName)" -ForegroundColor Green
-Write-Host "  Size:  $sizeMB MB" -ForegroundColor Green
+$sizeMB    = [math]::Round($installer.Length / 1MB, 2)
+Write-Host "  [OK] Installer: $($installer.FullName)" -ForegroundColor Green
+Write-Host "       Size:      $sizeMB MB" -ForegroundColor Green
 
 # --------------------------------------------------------------
-# PHASE 9 - INSTALL THE EXE SILENTLY
-# Runs the NSIS installer with:
-#   /S           = silent mode (no GUI, no clicks needed)
-#   /currentuser = installs for current user only (no admin)
-# Waits for installation to finish before continuing.
+# PHASE 9 - SILENT INSTALL
+# Runs the NSIS installer with these flags:
+#   /S           = silent mode (no prompts, no UI)
+#   /currentuser = install for current user only (no admin)
+# -Wait ensures the script does not exit before install ends.
+# After this the app appears in Start Menu > ZQ AI Logic.
 # --------------------------------------------------------------
 Write-Host "`n[PHASE 9] Installing ZQ Master Bridge silently..." -ForegroundColor Yellow
-Start-Process -FilePath $installer.FullName -ArgumentList "/S /currentuser" -Wait
-Write-Host "  Installation complete!" -ForegroundColor Green
+Start-Process -FilePath $installer.FullName `
+    -ArgumentList "/S /currentuser" `
+    -Wait
+Write-Host "  [OK] Installation complete!" -ForegroundColor Green
 
 # --------------------------------------------------------------
-# DONE
+# ALL DONE
 # --------------------------------------------------------------
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "  ZQ MASTER BRIDGE INSTALLED!" -ForegroundColor Cyan
-Write-Host "  Check Start Menu > ZQ AI Logic" -ForegroundColor Cyan
+Write-Host "  Find it in: Start Menu > ZQ AI Logic" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
