@@ -25,6 +25,8 @@ Write-Host "========================================`n" -ForegroundColor Cyan
 # --------------------------------------------------------------
 # PHASE 1 - CLONE THE REPOSITORY
 # Clones zq-master-bridge from GitHub into the current directory.
+# If the repo was already cloned (i.e. .git folder exists),
+# this phase is safely skipped.
 # If the repo was already cloned (.git folder exists) it pulls
 # the latest changes from main instead.
 # --------------------------------------------------------------
@@ -38,84 +40,75 @@ if (-Not (Test-Path ".git")) {
 }
 
 # --------------------------------------------------------------
-# PHASE 2 - CHECK AND INSTALL PREREQUISITES
-# Verifies that Node.js, Rust, and Python are available.
-# Auto-installs Rust via rustup if it is missing.
-# Node.js and Python must be installed manually if absent.
+# PHASE 2 - CHECK & INSTALL PREREQUISITES
+# Verifies Node.js, Rust, Python, and pip are installed.
+# Installs rustup if Rust is missing.
 # --------------------------------------------------------------
 Write-Host "`n[PHASE 2] Checking prerequisites..." -ForegroundColor Yellow
 
-# Check Node.js (>= 20 required for Vite + Tauri)
+# Node.js (>= 20 required for Vite + Tauri)
 if (-Not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "  ERROR: Node.js not found." -ForegroundColor Red
-    Write-Host "  Install Node.js >= 20 from: https://nodejs.org" -ForegroundColor Red
+    Write-Host "  ERROR: Node.js not found. Install from https://nodejs.org" -ForegroundColor Red
     exit 1
 } else {
-    Write-Host "  [OK] Node.js $(node --version)" -ForegroundColor Green
+    Write-Host "  Node.js: $(node --version)" -ForegroundColor Green
 }
 
-# Check Rust (required for Tauri native backend compilation)
-# Auto-installs via rustup bootstrap if missing
+# Rust (stable, required for Tauri native backend)
 if (-Not (Get-Command rustup -ErrorAction SilentlyContinue)) {
-    Write-Host "  Rust not found - installing rustup..." -ForegroundColor Gray
+    Write-Host "  Rust not found. Installing rustup..." -ForegroundColor Gray
     Invoke-WebRequest -Uri https://win.rustup.rs -OutFile rustup-init.exe
     .\rustup-init.exe -y --default-toolchain stable
     Remove-Item rustup-init.exe
-    Write-Host "  [OK] Rust installed." -ForegroundColor Green
 } else {
-    Write-Host "  [OK] $(rustc --version)" -ForegroundColor Green
+    Write-Host "  Rust: $(rustc --version)" -ForegroundColor Green
     rustup update stable | Out-Null
 }
 
-# Check Python (>= 3.11 for agent sidecar)
+# Python (>= 3.11 required for agent sidecar)
 if (-Not (Get-Command python -ErrorAction SilentlyContinue)) {
-    Write-Host "  ERROR: Python not found." -ForegroundColor Red
-    Write-Host "  Install Python >= 3.11 from: https://python.org" -ForegroundColor Red
+    Write-Host "  ERROR: Python not found. Install from https://python.org" -ForegroundColor Red
     exit 1
 } else {
-    Write-Host "  [OK] $(python --version)" -ForegroundColor Green
+    Write-Host "  Python: $(python --version)" -ForegroundColor Green
 }
 
 # --------------------------------------------------------------
-# PHASE 3 - INSTALL NODE.JS DEPENDENCIES
+# PHASE 3 - INSTALL NODE DEPENDENCIES
 # Downloads and installs all JavaScript/TypeScript packages
-# defined in package.json:
-#   - React 19, TypeScript, Vite (frontend)
-#   - @tauri-apps/cli (build tooling)
+# listed in package.json (React 19, Vite, Tauri CLI, etc.)
 # --------------------------------------------------------------
-Write-Host "`n[PHASE 3] Installing Node.js dependencies..." -ForegroundColor Yellow
+Write-Host "`n[PHASE 3] Installing Node.js dependencies (npm install)..." -ForegroundColor Yellow
 npm install
-Write-Host "  [OK] Node dependencies installed." -ForegroundColor Green
+Write-Host "  Node dependencies installed." -ForegroundColor Green
 
 # --------------------------------------------------------------
 # PHASE 4 - INSTALL PYTHON DEPENDENCIES
-# Installs the Python packages required by the agent sidecar
-# (agents/core/router.py) from agents/requirements.txt.
+# Installs packages needed by the Python agent sidecar
+# (agents/core/router.py) using pip.
 # --------------------------------------------------------------
-Write-Host "`n[PHASE 4] Installing Python agent dependencies..." -ForegroundColor Yellow
+Write-Host "`n[PHASE 4] Installing Python dependencies..." -ForegroundColor Yellow
 pip install -r agents/requirements.txt
-Write-Host "  [OK] Python dependencies installed." -ForegroundColor Green
+Write-Host "  Python dependencies installed." -ForegroundColor Green
 
 # --------------------------------------------------------------
-# PHASE 5 - GENERATE APPLICATION ICONS
-# Runs scripts/generate_icons.py which creates:
-#   - PNG icons: 32x32, 64x64, 128x128, 256x256
-#   - icon.ico:  multi-resolution (16 to 256px)
-# These are used by Windows for the EXE, taskbar, Start Menu.
+# PHASE 5 - GENERATE APP ICONS
+# Runs the icon generator script to produce all required PNG
+# sizes plus a multi-resolution icon.ico (16x16 to 256x256)
+# that Windows uses for the EXE, installer, and Start Menu.
 # --------------------------------------------------------------
 Write-Host "`n[PHASE 5] Generating application icons..." -ForegroundColor Yellow
 python scripts/generate_icons.py
-Write-Host "  [OK] Icons saved to src-tauri/icons/" -ForegroundColor Green
+Write-Host "  Icons generated in src-tauri/icons/" -ForegroundColor Green
 
 # --------------------------------------------------------------
 # PHASE 6 - BUNDLE PYTHON AGENT WITH PYINSTALLER
-# Compiles agents/core/router.py into a standalone Windows EXE
-# (zq-agent-router.exe) placed in src-tauri/resources/.
-# This sidecar ships inside the installer so end users do NOT
-# need Python installed on their machine.
-# PyInstaller is pip-installed automatically if not present.
+# Packages agents/core/router.py as a self-contained .exe
+# sidecar (zq-agent-router.exe) into src-tauri/resources/.
+# This means the end user does NOT need Python installed.
+# PyInstaller is installed automatically if not present.
 # --------------------------------------------------------------
-Write-Host "`n[PHASE 6] Bundling Python agent (PyInstaller)..." -ForegroundColor Yellow
+Write-Host "`n[PHASE 6] Bundling Python agent with PyInstaller..." -ForegroundColor Yellow
 pip install pyinstaller | Out-Null
 pyinstaller `
     --onefile `
