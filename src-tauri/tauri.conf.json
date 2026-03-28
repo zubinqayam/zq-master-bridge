@@ -16,7 +16,9 @@
         "width": 1200,
         "height": 800,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "decorations": true,
+        "center": true
       }
     ],
     "security": {
@@ -25,13 +27,49 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis", "msi"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "Zubin Qayam",
+    "copyright": "Copyright © 2026 Zubin Qayam",
+    "category": "Utility",
+    "shortDescription": "ZQ Control Room — local-first AI assistant",
+    "longDescription": "ZQ Master Bridge is a local-first, privacy-preserving AI assistant desktop application with a ChatGPT-style UI, Rust/Tauri backend, and Python agent sidecar.",
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "",
+      "tsp": false,
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "allowDowngrades": false,
+      "wix": null
+    },
+    "nsis": {
+      "license": "../LICENSE",
+      "headerImage": null,
+      "sidebarImage": null,
+      "installerIcon": "icons/icon.ico",
+      "installMode": "currentUser",
+      "languages": ["English"],
+      "displayLanguageSelector": false,
+      "customNsisScript": null,
+      "template": null,
+      "compression": "lzma",
+      "startMenuFolder": "ZQ AI Logic",
+      "shortcutName": "ZQ Master Bridge",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "enableDefaultFeature": true,
+      "minimumWebview2Version": null
+    },
+    "resources": ["resources/*"],
+    "externalBin": []
   }
 }
