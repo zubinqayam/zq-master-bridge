@@ -55,11 +55,13 @@ if __name__ == '__main__':
         f.write(make_ico([16, 32, 48, 256]))
     print('  ✔  icon.ico')
 
-    # Placeholder ICNS for macOS (Tauri will use it if present)
+    # ICNS for macOS (referenced by tauri.conf.json bundle.icon).
+    # A minimal 8-byte valid ICNS container (magic + file-length header, no image
+    # atoms) is sufficient here because the build targets are Windows-only
+    # (NSIS/MSI) and Tauri does not process .icns on non-macOS hosts.
     icns_path = os.path.join(icons_dir, 'icon.icns')
-    if not os.path.exists(icns_path):
-        with open(icns_path, 'wb') as f:
-            f.write(b'icns' + struct.pack('>I', 8))
-        print('  ✔  icon.icns (placeholder)')
+    with open(icns_path, 'wb') as f:
+        f.write(b'icns' + struct.pack('>I', 8))
+    print('  ✔  icon.icns')
 
     print('\nAll icons generated successfully.')
