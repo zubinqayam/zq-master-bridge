@@ -48,12 +48,12 @@ if __name__ == '__main__':
         path = os.path.join(icons_dir, name)
         with open(path, 'wb') as f:
             f.write(make_rgba_png(w, h))
-        print(f'  ✔  {name}')
+        print(f'  [OK] {name}')
 
     ico_path = os.path.join(icons_dir, 'icon.ico')
     with open(ico_path, 'wb') as f:
         f.write(make_ico([16, 32, 48, 256]))
-    print('  ✔  icon.ico')
+    print('  [OK] icon.ico')
 
     # ICNS for macOS (referenced by tauri.conf.json bundle.icon).
     # A minimal 8-byte valid ICNS container (magic + file-length header, no image
@@ -62,6 +62,6 @@ if __name__ == '__main__':
     icns_path = os.path.join(icons_dir, 'icon.icns')
     with open(icns_path, 'wb') as f:
         f.write(b'icns' + struct.pack('>I', 8))
-    print('  ✔  icon.icns')
+    print('  [OK] icon.icns')
 
     print('\nAll icons generated successfully.')
