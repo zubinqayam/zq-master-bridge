@@ -18,6 +18,8 @@ path = "src/main.rs"
 # VERSIONINFO resource and a fatal LNK1123 linker error.
 tauri-build = { version = "2", features = [] }
 
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
 [dependencies]
 tauri = { version = "2", features = ["protocol-asset"] }
 serde = { version = "1", features = ["derive"] }
