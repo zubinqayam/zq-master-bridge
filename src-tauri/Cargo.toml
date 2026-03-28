@@ -14,12 +14,9 @@ path = "src/main.rs"
 
 [build-dependencies]
 # tauri-build handles all Windows resource embedding (VERSIONINFO, icon,
-# manifest) automatically. Do NOT add winres here - it causes a duplicate
-# VERSIONINFO resource and a fatal LNK1123 linker error.
+# manifest) automatically via tauri.conf.json — no winres needed.
 tauri-build = { version = "2", features = [] }
 
-[target.'cfg(windows)'.build-dependencies]
-winres = "0.1"
 [dependencies]
 tauri = { version = "2", features = ["protocol-asset"] }
 serde = { version = "1", features = ["derive"] }
