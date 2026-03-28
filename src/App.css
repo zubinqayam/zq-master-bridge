@@ -64,7 +64,7 @@ body {
   text-align: left;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .sidebar-nav button:hover {
