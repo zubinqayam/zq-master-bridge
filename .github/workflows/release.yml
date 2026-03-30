@@ -36,7 +36,7 @@ jobs:
     needs: typecheck
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install ruff
@@ -76,7 +76,7 @@ jobs:
 
       # Bundle the Python agent sidecar as a standalone exe
       - name: Set up Python for sidecar bundle
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
