@@ -72,29 +72,32 @@ jobs:
 
       - name: Generate icons (PNG + ICO)
         run: python scripts/generate_icons.py
-        shell: bash
+        shell: pwsh
 
-      # Bundle the Python agent sidecar as a standalone exe
       - name: Set up Python for sidecar bundle
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
-      - name: Install PyInstaller + agent dependencies
+      - name: Install sidecar build dependencies
         run: |
-          pip install pyinstaller
-          pip install -r agents/requirements.txt 2>/dev/null || true
-        shell: bash
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+          if (Test-Path "agents/requirements.txt") {
+            python -m pip install -r agents/requirements.txt
+          }
+        shell: pwsh
 
       - name: Bundle Python agent sidecar
+        run: ./scripts/build-sidecar.ps1
+        shell: pwsh
+
+      - name: Verify sidecar bundle
         run: |
-          pyinstaller \
-            --onefile \
-            --name zq-agent-router \
-            --distpath src-tauri/resources \
-            --noconfirm \
-            agents/core/router.py
-        shell: bash
+          if (-not (Test-Path "src-tauri/resources/zq-agent-router.exe")) {
+            throw "Missing bundled sidecar executable."
+          }
+        shell: pwsh
 
       - name: Build Tauri NSIS installer
         uses: tauri-apps/tauri-action@v0

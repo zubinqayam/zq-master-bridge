@@ -18,7 +18,7 @@ path = "src/main.rs"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["protocol-asset"] }
+tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 rusqlite = { version = "0.39", features = ["bundled"] }
 tokio = { version = "1", features = ["full"] }
@@ -31,3 +31,8 @@ codegen-units = 1
 lto = true
 opt-level = "s"
 strip = true
+<<<<<<< HEAD
+
+## winres removed — tauri-build handles embedding resources on Windows
+=======
+>>>>>>> 83f27ddb48cc021212e124e4d0be7d653815dca5

@@ -17,9 +17,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: "24"
+          node-version: "20"
       - name: Install Node dependencies
-        run: npm install
+        run: npm ci
       - name: Type-check
         run: npx tsc --noEmit
   python-lint:
