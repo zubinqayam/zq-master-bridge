@@ -12,6 +12,11 @@ rust-version = "1.77"
 name = "zq-master-bridge"
 path = "src/main.rs"
 
+[lib]
+name = "zq_master_bridge_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+path = "src/lib.rs"
+
 [build-dependencies]
 # tauri-build handles all Windows resource embedding (VERSIONINFO, icon,
 # manifest) automatically via tauri.conf.json — no winres needed.
@@ -31,8 +36,5 @@ codegen-units = 1
 lto = true
 opt-level = "s"
 strip = true
-<<<<<<< HEAD
 
-## winres removed — tauri-build handles embedding resources on Windows
-=======
->>>>>>> 83f27ddb48cc021212e124e4d0be7d653815dca5
+# winres removed — tauri-build handles embedding resources on Windows
