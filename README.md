@@ -12,10 +12,10 @@
 | Layer | Technology | Notes |
 |-------|-----------|-------|
 | UI | React 19 + TypeScript + Vite | ChatGPT-style chat interface |
-| Desktop | Rust + Tauri 2 | Native Windows / macOS / Linux |
+| Desktop | Rust + Tauri 2 | Windows desktop release target |
 | Agents | Python 3.11+ asyncio | Pluggable agent router |
 | Database | SQLite (WAL mode) | Conversations, tasks, audit log |
-| CI/CD | GitHub Actions | Build + release for all platforms |
+| CI/CD | GitHub Actions | Push/PR checks plus Windows release builds |
 
 ---
 
@@ -28,11 +28,6 @@
 | [Node.js](https://nodejs.org) | ≥ 20 |
 | [Rust](https://rustup.rs) | stable (≥ 1.77) |
 | [Python](https://python.org) | ≥ 3.11 |
-
-> **Linux users:** install WebKit system libraries first:
-> ```bash
-> sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev
-> ```
 
 ### Steps
 
@@ -57,6 +52,8 @@ npm run tauri:dev
 # 6. (Optional) Start Python agent sidecar in a separate terminal
 python -m agents.core.router
 ```
+
+> Packaged release support is Windows-only. Local Android APK builds are supported through the Tauri Android toolchain after Android SDK setup.
 
 ---
 
@@ -96,17 +93,30 @@ zq-master-bridge/
 ## 🔨 Build for Production
 
 ```bash
-# Build the Tauri desktop app (outputs to src-tauri/target/release/bundle/)
-npm run tauri:build
+# Build the packaged Python sidecar into src-tauri/resources/
+npm run sidecar:build
+
+# Build the Windows NSIS installer
+npm run tauri:build -- --bundles nsis
 ```
 
-Platform bundles generated:
+Windows release artifact:
 
 | Platform | Output |
 |----------|--------|
 | Windows | `.exe` (NSIS installer) |
-| macOS | `.app` / `.dmg` |
-| Linux | `.AppImage` / `.deb` |
+
+## 📱 Local Android APK Build
+
+```bash
+# Initialize the Android target once on a machine with Android SDK + Java configured
+npm run android:init
+
+# Build local APKs for Android validation
+npm run android:build
+```
+
+Android APK builds are for local/mobile validation and are not part of the official GitHub release contract.
 
 ---
 

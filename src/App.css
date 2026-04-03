@@ -1,0 +1,549 @@
+/* ZQ Master Bridge - Full Featured Dashboard Styles */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0a0a0a;
+  color: #e0e0e0;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.sidebar-header h2 {
+  font-size: 1.125rem;
+  margin-bottom: 4px;
+}
+
+.sidebar-header .version {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.sidebar-nav {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+}
+
+.sidebar-nav button {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  background: transparent;
+  color: #ccc;
+  border: none;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-nav button:hover {
+  background: #252525;
+  color: #fff;
+}
+
+.sidebar-nav button.active {
+  background: #667eea;
+  color: white;
+}
+
+.conversations-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.new-conversation-btn {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px dashed #555;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.new-conversation-btn:hover {
+  background: #333;
+  border-color: #667eea;
+}
+
+.conversation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conversation-item {
+  padding: 12px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.conversation-item:hover {
+  background: #2a2a2a;
+  border-color: #555;
+}
+
+.conversation-item.active {
+  background: #2d2d5f;
+  border-color: #667eea;
+}
+
+.conversation-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.conversation-date {
+  font-size: 11px;
+  color: #888;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Chat View */
+.chat-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #0f0f0f;
+}
+
+.message {
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.message-user {
+  background: #1e3a5f;
+  margin-left: auto;
+}
+
+.message-assistant {
+  background: #1e1e1e;
+  border: 1px solid #333;
+}
+
+.message-role {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.message-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e0e0e0;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #666;
+  margin-top: 8px;
+}
+
+.input-container {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  background: #1a1a1a;
+  border-top: 1px solid #333;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 12px 16px;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.input-container input:focus {
+  border-color: #667eea;
+}
+
+.input-container input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-container button {
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.input-container button:hover:not(:disabled) {
+  background: #5568d3;
+}
+
+.input-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Agents View */
+.agents-view {
+  padding: 30px;
+  overflow-y: auto;
+  background: #0f0f0f;
+}
+
+.agents-view h2 {
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.agent-card {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 20px;
+  transition: all 0.2s;
+}
+
+.agent-card:hover {
+  border-color: #555;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.agent-header h3 {
+  font-size: 16px;
+  color: #fff;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #444;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #667eea;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+.agent-description {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.agent-status {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Tasks View */
+.tasks-view {
+  padding: 30px;
+  overflow-y: auto;
+  background: #0f0f0f;
+}
+
+.tasks-view h2,
+.logs-view h2 {
+  display: inline-block;
+  margin-right: 16px;
+  color: #fff;
+}
+
+.refresh-btn {
+  padding: 8px 16px;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.refresh-btn:hover {
+  background: #333;
+  border-color: #667eea;
+}
+
+.tasks-table,
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tasks-table thead,
+.logs-table thead {
+  background: #2a2a2a;
+}
+
+.tasks-table th,
+.logs-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #aaa;
+  border-bottom: 1px solid #333;
+}
+
+.tasks-table td,
+.logs-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #e0e0e0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.tasks-table tr:hover,
+.logs-table tr:hover {
+  background: #252525;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending {
+  background: #4a4a2a;
+  color: #ffd700;
+}
+
+.status-running {
+  background: #2a3a5a;
+  color: #6495ed;
+}
+
+.status-done {
+  background: #2a4a2a;
+  color: #90ee90;
+}
+
+.status-failed {
+  background: #4a2a2a;
+  color: #ff6b6b;
+}
+
+.task-result {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Logs View */
+.logs-view {
+  padding: 30px;
+  overflow-y: auto;
+  background: #0f0f0f;
+}
+
+.logs-view h2 {
+  display: inline-block;
+  margin-right: 16px;
+  color: #fff;
+}
+
+.log-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.log-debug {
+  background: #2a2a3a;
+  color: #aaa;
+}
+
+.log-info {
+  background: #2a3a4a;
+  color: #6495ed;
+}
+
+.log-warn {
+  background: #4a3a2a;
+  color: #ffa500;
+}
+
+.log-error {
+  background: #4a2a2a;
+  color: #ff6b6b;
+}
+
+/* Settings View */
+.settings-view {
+  padding: 30px;
+  overflow-y: auto;
+  background: #0f0f0f;
+}
+
+.settings-view h2 {
+  margin-bottom: 30px;
+  color: #fff;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.settings-section h3 {
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #fff;
+}
+
+.settings-section p {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.settings-section a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.settings-section a:hover {
+  text-decoration: underline;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

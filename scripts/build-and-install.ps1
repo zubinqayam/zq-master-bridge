@@ -103,19 +103,11 @@ Write-Host "  Icons generated in src-tauri/icons/" -ForegroundColor Green
 
 # --------------------------------------------------------------
 # PHASE 6 - BUNDLE PYTHON AGENT WITH PYINSTALLER
-# Packages agents/core/router.py as a self-contained .exe
-# sidecar (zq-agent-router.exe) into src-tauri/resources/.
-# This means the end user does NOT need Python installed.
-# PyInstaller is installed automatically if not present.
+# Uses the tracked zq-agent-router.spec so local builds match CI.
+# Outputs src-tauri/resources/zq-agent-router.exe.
 # --------------------------------------------------------------
 Write-Host "`n[PHASE 6] Bundling Python agent with PyInstaller..." -ForegroundColor Yellow
-pip install pyinstaller | Out-Null
-pyinstaller `
-    --onefile `
-    --distpath src-tauri/resources `
-    --name zq-agent-router `
-    --clean `
-    agents/core/router.py
+& ".\scripts\build-sidecar.ps1" -InstallDependencies
 Write-Host "  [OK] Agent EXE: src-tauri/resources/zq-agent-router.exe" -ForegroundColor Green
 
 # --------------------------------------------------------------

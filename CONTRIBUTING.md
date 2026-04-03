@@ -71,6 +71,34 @@ npm run tauri:dev
 python -m agents.core.router
 ```
 
+Windows is the only supported packaged release target. Android APKs are supported as a local build workflow when the Android SDK is installed.
+
+### Local Release Validation
+
+```bash
+# Frontend production build
+npm run build
+
+# Rust backend validation
+cd src-tauri && cargo check
+
+# Python sidecar bundle
+npm run sidecar:build
+
+# Windows installer build
+npm run tauri:build -- --bundles nsis
+```
+
+### Local Android Validation
+
+```bash
+# One-time setup on a machine with Android SDK + Java
+npm run android:init
+
+# Build local Android APKs
+npm run android:build
+```
+
 ---
 
 ## Branching Strategy
