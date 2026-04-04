@@ -1,28 +1,35 @@
-/* Global reset and base styles */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-html, body, #root {
-  height: 100%;
+html,
+body,
+#root {
   width: 100%;
+  min-height: 100%;
+  margin: 0;
 }
 
 body {
   overflow: hidden;
 }
 
+a {
+  color: inherit;
+}
+
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 3px;
+  background: rgba(126, 157, 191, 0.28);
+  border-radius: 999px;
 }

@@ -12,7 +12,8 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "android:init": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1 -InitOnly",
-    "android:build": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1"
+    "android:build": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1",
+    "android:build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1 -Release"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

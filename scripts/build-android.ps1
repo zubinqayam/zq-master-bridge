@@ -3,7 +3,8 @@
 
 [CmdletBinding()]
 param(
-    [switch]$InitOnly
+    [switch]$InitOnly,
+    [switch]$Release
 )
 
 $ErrorActionPreference = "Stop"
@@ -71,7 +72,11 @@ try {
         return
     }
 
-    npx tauri android build --apk --target aarch64 x86_64
+    if ($Release) {
+        npx tauri android build --apk --target aarch64 x86_64
+    } else {
+        npx tauri android build --debug --apk --target aarch64 x86_64
+    }
 } finally {
     Pop-Location
 }
