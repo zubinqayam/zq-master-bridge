@@ -3,19 +3,19 @@
 [![Build & Release](https://github.com/zubinqayam/zq-master-bridge/actions/workflows/release.yml/badge.svg)](https://github.com/zubinqayam/zq-master-bridge/actions/workflows/release.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-> **Control Room V2** — A local-first, privacy-preserving AI assistant with a ChatGPT-style UI, Rust/Tauri desktop backend, Python agent sidecar, and a V3 roadmap for 500+ parallel agents.
+> **Phase 1 workstation shell** — A local-first Tauri application for the Saada / General Surgery workstation with a sample-driven clinical UI, SQLite-backed local state, and first-class integration points for ZQ Coordinator and INNM Taskbox.
 
 ---
 
 ## ✨ Features
 
 | Layer | Technology | Notes |
-|-------|-----------|-------|
-| UI | React 19 + TypeScript + Vite | ChatGPT-style chat interface |
-| Desktop | Rust + Tauri 2 | Native Windows / macOS / Linux |
-| Agents | Python 3.11+ asyncio | Pluggable agent router |
-| Database | SQLite (WAL mode) | Conversations, tasks, audit log |
-| CI/CD | GitHub Actions | Build + release for all platforms |
+| ------- | ----------- | ------- |
+| UI | React 19 + TypeScript + Vite | Workstation shell with Home, Files, Analytics, and Operations surfaces |
+| Desktop | Rust + Tauri 2 | Windows desktop release target plus Android local builds |
+| Data | SQLite (WAL mode) | Conversations, tasks, logs, workspace tree, and module registry |
+| Integrations | Local path discovery | ZQ Coordinator and INNM Taskbox phase 1 launch points |
+| CI/CD | GitHub Actions | Push/PR checks plus Windows release builds |
 
 ---
 
@@ -24,15 +24,10 @@
 ### Prerequisites
 
 | Tool | Version |
-|------|---------|
+| ------ | --------- |
 | [Node.js](https://nodejs.org) | ≥ 20 |
 | [Rust](https://rustup.rs) | stable (≥ 1.77) |
 | [Python](https://python.org) | ≥ 3.11 |
-
-> **Linux users:** install WebKit system libraries first:
-> ```bash
-> sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential libssl-dev
-> ```
 
 ### Steps
 
@@ -48,15 +43,14 @@ cp .env.example .env
 # 3. Install Node dependencies
 npm install
 
-# 4. Initialise the database
-sqlite3 zq.db < database/schema.sql
-
-# 5. Start the desktop app (Vite dev server + Tauri)
+# 4. Start the desktop app (Vite dev server + Tauri)
 npm run tauri:dev
 
-# 6. (Optional) Start Python agent sidecar in a separate terminal
+# 5. (Optional) Start Python agent sidecar in a separate terminal
 python -m agents.core.router
 ```
+
+> Packaged release support is Windows-only. Local Android APK builds are supported through the Tauri Android toolchain after Android SDK setup.
 
 ---
 
@@ -65,11 +59,12 @@ python -m agents.core.router
 ```
 zq-master-bridge/
 ├── src/                      # React 19 UI
-│   ├── App.tsx               # Main chat component
+│   ├── App.tsx               # Workstation shell and routed views
 │   ├── main.tsx              # React entry point
 │   └── index.css             # Global styles
 ├── src-tauri/                # Rust Tauri backend
-│   ├── src/main.rs           # Tauri commands (chat, agent_status)
+│   ├── src/main.rs           # Desktop entry point
+│   ├── src/lib.rs            # SQLite bootstrapping + workstation IPC
 │   ├── tauri.conf.json       # Tauri configuration
 │   └── Cargo.toml            # Rust dependencies
 ├── agents/                   # Python agent sidecar
@@ -96,17 +91,40 @@ zq-master-bridge/
 ## 🔨 Build for Production
 
 ```bash
-# Build the Tauri desktop app (outputs to src-tauri/target/release/bundle/)
-npm run tauri:build
+# Build the packaged Python sidecar into src-tauri/resources/
+npm run sidecar:build
+
+# Build the Windows NSIS installer
+npm run tauri:build -- --bundles nsis
 ```
 
-Platform bundles generated:
+Windows release artifact:
 
 | Platform | Output |
 |----------|--------|
 | Windows | `.exe` (NSIS installer) |
-| macOS | `.app` / `.dmg` |
-| Linux | `.AppImage` / `.deb` |
+
+## Workstation Scope
+
+- Phase 1 UI follows the workstation sample direction rather than the earlier tabbed placeholder shell.
+- The local database now stores workspace structure, module registry entries, conversations, messages, tasks, and logs.
+- `C:\Users\zubin\ZQ_COORDINATOR` and `C:\ZQ_Taskbox` are detected at runtime and exposed in the Operations and Workstation views.
+- Feedback Bot, INNM / Woods, and Keyhole are surfaced as deferred module slots so they are visible even when not yet integrated.
+
+## 📱 Local Android APK Build
+
+```bash
+# Initialize the Android target once on a machine with Android SDK + Java configured
+npm run android:init
+
+# Build installable debug APKs for local device/emulator testing
+npm run android:build
+
+# Build release APKs when you need a release artifact
+npm run android:build:release
+```
+
+Android APK builds are for local/mobile validation and are not part of the official GitHub release contract.
 
 ---
 

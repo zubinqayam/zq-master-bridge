@@ -61,14 +61,44 @@ cp .env.example .env
 # 3. Install Node dependencies
 npm install
 
-# 4. Apply SQLite schema
-sqlite3 zq.db < database/schema.sql
-
-# 5. Start dev server (Vite + Tauri)
+# 4. Start dev server (Vite + Tauri)
 npm run tauri:dev
 
-# 6. (Optional) Start Python agent router
+# 5. (Optional) Start Python agent router
 python -m agents.core.router
+```
+
+Windows is the only supported packaged release target. Android APKs are supported as a local build workflow when the Android SDK is installed.
+
+The app now bootstraps and migrates its SQLite database automatically on startup. Do not apply `database/schema.sql` manually unless you are intentionally inspecting or recreating the schema outside the app.
+
+### Local Release Validation
+
+```bash
+# Frontend production build
+npm run build
+
+# Rust backend validation
+cd src-tauri && cargo check
+
+# Python sidecar bundle
+npm run sidecar:build
+
+# Windows installer build
+npm run tauri:build -- --bundles nsis
+```
+
+### Local Android Validation
+
+```bash
+# One-time setup on a machine with Android SDK + Java
+npm run android:init
+
+# Build installable debug APKs for local testing
+npm run android:build
+
+# Build release APKs when needed
+npm run android:build:release
 ```
 
 ---

@@ -1,0 +1,36 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  ts-typecheck:
+    name: TypeScript type-check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+      - name: Install Node dependencies
+        run: npm ci
+      - name: Type-check
+        run: npx tsc --noEmit
+  python-lint:
+    name: Python agent lint
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install ruff
+      - name: Lint agents/
+        run: ruff check agents/

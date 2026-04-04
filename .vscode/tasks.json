@@ -1,76 +1,166 @@
 {
+  // ============================================================
+  // ZQ MASTER BRIDGE — VS CODE TASKS
+  // Full pipeline: Clone → Install → Build → Package → Install EXE
+  // Run any task via:  Terminal > Run Task...
+  // Run the FULL pipeline with: "ZQ: FULL PIPELINE (Clone to EXE)"
+  // ============================================================
   "version": "2.0.0",
   "tasks": [
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 1 — CLONE THE REPO
+    // Clones zq-master-bridge from GitHub into the current folder.
+    // Only needed the first time on a new machine.
+    // ─────────────────────────────────────────────────────────────
     {
-      "label": "Dev: Start Vite + Tauri",
+      "label": "ZQ 1: Clone Repo",
+      "type": "shell",
+      "command": "git clone https://github.com/zubinqayam/zq-master-bridge.git . || echo 'Already cloned, skipping.'",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 2 — INSTALL NODE DEPENDENCIES (npm)
+    // Installs all JavaScript/TypeScript packages from package.json.
+    // Required before any build step.
+    // ─────────────────────────────────────────────────────────────
+    {
+      "label": "ZQ 2: Install Node Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 3 — INSTALL PYTHON DEPENDENCIES
+    // Installs Python packages for the agent sidecar (router.py).
+    // Uses pip with agents/requirements.txt
+    // ─────────────────────────────────────────────────────────────
+    {
+      "label": "ZQ 3: Install Python Dependencies",
+      "type": "shell",
+      "command": "pip install -r agents/requirements.txt",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 4 — INSTALL RUST TOOLCHAIN
+    // Ensures Rust stable is installed via rustup.
+    // Tauri needs Rust to compile the native desktop backend.
+    // ─────────────────────────────────────────────────────────────
+    {
+      "label": "ZQ 4: Install / Update Rust",
+      "type": "shell",
+      "command": "rustup update stable",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 5 — GENERATE ICONS
+    // Runs scripts/generate_icons.py to produce all app icons:
+    // PNG sizes (32, 64, 128, 256) + multi-res icon.ico for Windows.
+    // ─────────────────────────────────────────────────────────────
+    {
+      "label": "ZQ 5: Generate App Icons",
+      "type": "shell",
+      "command": "python scripts/generate_icons.py",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 6 — BUNDLE PYTHON AGENT WITH PYINSTALLER
+    // Packages agents/core/router.py into a standalone .exe sidecar
+    // so it ships inside the installer without needing Python on
+    // the end user's machine.
+    // ─────────────────────────────────────────────────────────────
+    {
+      "label": "ZQ 6: Bundle Python Agent (PyInstaller)",
+      "type": "shell",
+      "command": "pip install pyinstaller && pyinstaller --onefile --distpath src-tauri/resources --name zq-agent-router agents/core/router.py",
+      "group": "build",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 7 — DEV MODE (optional, for live testing)
+    // Starts the Vite dev server + Tauri in development mode.
+    // Hot-reload enabled. Use this to test before building.
+    // ─────────────────────────────────────────────────────────────
+    {
+      "label": "ZQ 7: Dev Mode (Vite + Tauri)",
       "type": "shell",
       "command": "npm run tauri:dev",
       "group": "build",
       "isBackground": true,
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
     },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 8 — BUILD WINDOWS EXE INSTALLER (NSIS)
+    // Compiles React UI + Rust backend and bundles everything into
+    // a professional Windows NSIS installer (.exe).
+    // Output: src-tauri/target/release/bundle/nsis/*.exe
+    // ─────────────────────────────────────────────────────────────
     {
-      "label": "Build: Tauri Release",
+      "label": "ZQ 8: Build Windows EXE (NSIS Installer)",
       "type": "shell",
-      "command": "npm run tauri:build",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": ["$rustc"]
+      "command": "npm run tauri:build -- --bundles nsis",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
     },
+
+    // ─────────────────────────────────────────────────────────────
+    // STEP 9 — INSTALL THE EXE (silent, current user)
+    // Finds the built NSIS .exe and runs it silently.
+    // /S = silent install, /currentuser = no admin rights needed.
+    // ─────────────────────────────────────────────────────────────
     {
-      "label": "Frontend: Vite Dev Server",
+      "label": "ZQ 9: Install EXE (Silent)",
       "type": "shell",
-      "command": "npm run dev",
+      "command": "$exe = Get-ChildItem -Recurse src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1; if ($exe) { Start-Process $exe.FullName -ArgumentList '/S /currentuser' -Wait; Write-Host 'Installed!' } else { Write-Host 'EXE not found. Run Step 8 first.' }",
+      "options": { "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] } },
       "group": "build",
-      "isBackground": true,
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
     },
+
+    // ─────────────────────────────────────────────────────────────
+    // MASTER TASK — RUN THE FULL PIPELINE (Clone → EXE → Install)
+    // Executes all steps in order: 1 through 9.
+    // Just run this one task on a fresh machine to go from
+    // zero to a fully installed ZQ Master Bridge .exe.
+    // ─────────────────────────────────────────────────────────────
     {
-      "label": "Agents: Start Router",
-      "type": "shell",
-      "command": "python -m agents.core.router",
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "new"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Database: Apply Schema",
-      "type": "shell",
-      "command": "sqlite3 zq.db < database/schema.sql",
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Install: Node dependencies",
-      "type": "shell",
-      "command": "npm install",
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
+      "label": "ZQ: FULL PIPELINE (Clone to EXE Install)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "ZQ 1: Clone Repo",
+        "ZQ 2: Install Node Dependencies",
+        "ZQ 3: Install Python Dependencies",
+        "ZQ 4: Install / Update Rust",
+        "ZQ 5: Generate App Icons",
+        "ZQ 6: Bundle Python Agent (PyInstaller)",
+        "ZQ 8: Build Windows EXE (NSIS Installer)",
+        "ZQ 9: Install EXE (Silent)"
+      ],
+      "group": { "kind": "build", "isDefault": false },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
     }
+
   ]
 }

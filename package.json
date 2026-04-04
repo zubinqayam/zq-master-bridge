@@ -7,9 +7,13 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "sidecar:build": "powershell -ExecutionPolicy Bypass -File ./scripts/build-sidecar.ps1",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "android:init": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1 -InitOnly",
+    "android:build": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1",
+    "android:build:release": "powershell -ExecutionPolicy Bypass -File ./scripts/build-android.ps1 -Release"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
@@ -18,6 +22,7 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",
+    "@types/node": "^24.6.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
