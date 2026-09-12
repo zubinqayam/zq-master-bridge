@@ -37,7 +37,6 @@
     "publisher": "Zubin Qayam",
     "copyright": "Copyright © 2026 Zubin Qayam",
     "category": "Utility",
-    "licenseFile": "../LICENSE",
     "shortDescription": "ZQ Control Room — local-first AI assistant",
     "longDescription": "ZQ Master Bridge is a local-first, privacy-preserving AI assistant desktop application with a ChatGPT-style UI, Rust/Tauri backend, and Python agent sidecar.",
     "windows": {
