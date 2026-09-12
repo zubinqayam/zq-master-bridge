@@ -1,153 +1,104 @@
 # ZQ Master Bridge
 
-[![Build & Release](https://github.com/zubinqayam/zq-master-bridge/actions/workflows/release.yml/badge.svg)](https://github.com/zubinqayam/zq-master-bridge/actions/workflows/release.yml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+## Workflow Systems and Digital Productivity Prototype
 
-> **Phase 1 workstation shell** — A local-first Tauri application for the Saada / General Surgery workstation with a sample-driven clinical UI, SQLite-backed local state, and first-class integration points for ZQ Coordinator and INNM Taskbox.
+ZQ Master Bridge is a local-first desktop software prototype exploring workflow coordination, automation concepts, data dashboards, and AI-assisted productivity.
 
----
+## Project Overview
 
-## ✨ Features
+The project combines a web interface with a desktop shell and local data capabilities. It is intended for experimentation, architecture research, and public-safe project documentation.
 
-| Layer | Technology | Notes |
-| ------- | ----------- | ------- |
-| UI | React 19 + TypeScript + Vite | Workstation shell with Home, Files, Analytics, and Operations surfaces |
-| Desktop | Rust + Tauri 2 | Windows desktop release target plus Android local builds |
-| Data | SQLite (WAL mode) | Conversations, tasks, logs, workspace tree, and module registry |
-| Integrations | Local path discovery | ZQ Coordinator and INNM Taskbox phase 1 launch points |
-| CI/CD | GitHub Actions | Push/PR checks plus Windows release builds |
+## What It Contains
 
----
+- React views for workflow and project information
+- A Tauri desktop shell for local experimentation
+- Rust integration points for desktop capabilities
+- SQLite-backed local state and schema files
+- Optional Python sidecar tooling
+- Documentation and scripts for local development and packaging experiments
 
-## 🚀 Quick Start
+## Current Status
 
-### Prerequisites
+**Prototype** — active technical exploration and architecture documentation.
 
-| Tool | Version |
-| ------ | --------- |
-| [Node.js](https://nodejs.org) | ≥ 20 |
-| [Rust](https://rustup.rs) | stable (≥ 1.77) |
-| [Python](https://python.org) | ≥ 3.11 |
+This repository may contain incomplete features, experimental integrations, and local-only assumptions. It is not presented as production-ready software.
 
-### Steps
+## Architecture
+
+The project includes a React and TypeScript frontend, a Rust and Tauri desktop layer, SQLite persistence, and an optional Python sidecar. The main code areas are `src/`, `src-tauri/`, `agents/`, `database/`, and `docs/`.
+
+## Tech Stack
+
+Verified from the repository and package manifest:
+
+- React 19
+- TypeScript
+- Vite
+- Tauri 2
+- Rust
+- SQLite
+- Python sidecar tooling
+- GitHub Actions workflows
+
+## Local Development
+
+Prerequisites listed by the repository include Node.js, Rust, and Python. Install JavaScript dependencies first:
 
 ```bash
-# 1. Clone
-git clone https://github.com/zubinqayam/zq-master-bridge.git
-cd zq-master-bridge
-
-# 2. Environment
-cp .env.example .env
-# Edit .env with your values (API keys, etc.)
-
-# 3. Install Node dependencies
 npm install
+```
 
-# 4. Start the desktop app (Vite dev server + Tauri)
+Start the web development server:
+
+```bash
+npm run dev
+```
+
+Start the desktop development shell when the Tauri toolchain is configured:
+
+```bash
 npm run tauri:dev
-
-# 5. (Optional) Start Python agent sidecar in a separate terminal
-python -m agents.core.router
 ```
 
-> Packaged release support is Windows-only. Local Android APK builds are supported through the Tauri Android toolchain after Android SDK setup.
-
----
-
-## 🏗️ Project Structure
-
-```
-zq-master-bridge/
-├── src/                      # React 19 UI
-│   ├── App.tsx               # Workstation shell and routed views
-│   ├── main.tsx              # React entry point
-│   └── index.css             # Global styles
-├── src-tauri/                # Rust Tauri backend
-│   ├── src/main.rs           # Desktop entry point
-│   ├── src/lib.rs            # SQLite bootstrapping + workstation IPC
-│   ├── tauri.conf.json       # Tauri configuration
-│   └── Cargo.toml            # Rust dependencies
-├── agents/                   # Python agent sidecar
-│   └── core/router.py        # Async agent router
-├── database/
-│   └── schema.sql            # SQLite schema
-├── docs/
-│   └── v3/ARCHITECTURE.md    # V3 roadmap (500+ agents)
-├── .github/
-│   ├── workflows/release.yml # CI/CD — build + release
-│   ├── SECURITY.md           # Vulnerability reporting
-│   ├── dependabot.yml        # Automated dependency updates
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── ISSUE_TEMPLATE/       # Bug report + feature request
-├── .vscode/                  # VSCode tasks + extensions
-├── .env.example              # Environment variable template
-├── CONTRIBUTING.md           # Contributor guide
-├── CHANGELOG.md              # Release notes
-└── LICENSE                   # Apache 2.0
-```
-
----
-
-## 🔨 Build for Production
+Optional documented commands include:
 
 ```bash
-# Build the packaged Python sidecar into src-tauri/resources/
 npm run sidecar:build
-
-# Build the Windows NSIS installer
-npm run tauri:build -- --bundles nsis
-```
-
-Windows release artifact:
-
-| Platform | Output |
-|----------|--------|
-| Windows | `.exe` (NSIS installer) |
-
-## Workstation Scope
-
-- Phase 1 UI follows the workstation sample direction rather than the earlier tabbed placeholder shell.
-- The local database now stores workspace structure, module registry entries, conversations, messages, tasks, and logs.
-- `C:\Users\zubin\ZQ_COORDINATOR` and `C:\ZQ_Taskbox` are detected at runtime and exposed in the Operations and Workstation views.
-- Feedback Bot, INNM / Woods, and Keyhole are surfaced as deferred module slots so they are visible even when not yet integrated.
-
-## 📱 Local Android APK Build
-
-```bash
-# Initialize the Android target once on a machine with Android SDK + Java configured
+npm run tauri:build
 npm run android:init
-
-# Build installable debug APKs for local device/emulator testing
 npm run android:build
-
-# Build release APKs when you need a release artifact
-npm run android:build:release
 ```
 
-Android APK builds are for local/mobile validation and are not part of the official GitHub release contract.
+Verify local toolchain requirements before running packaging or mobile commands.
 
----
+## Verification
 
-## 🤖 V3 Roadmap (500+ Agents)
+- Build status: verify `npm run build` locally before describing a release as usable.
+- Test status: review the repository's available tests and workflows before making test claims.
+- CI status: workflow files are present; current CI results should be checked on GitHub.
+- Known limitations: local integrations, desktop packaging, sidecar tooling, and mobile commands may require platform-specific setup.
 
-See [`docs/v3/ARCHITECTURE.md`](docs/v3/ARCHITECTURE.md) for the full V3 blueprint.
+## Public Safety and Privacy
 
-V3 development happens on the `version/Enhancement-lab-` branch.
+This repository is intended for public-safe project documentation only. Do not include restricted organizational information, employer-specific material, private personal information, business-sensitive material, access credentials, private messages, or non-public process details.
 
----
+Use synthetic or publicly available examples. Do not claim production readiness, customer deployment, commercial use, formal validation, or enterprise readiness unless independently verified.
 
-## 🔒 Security
+## Roadmap
+
+- Clarify the public workflow and data model documentation.
+- Add reproducible examples using safe, non-sensitive data.
+- Record build and verification results for supported platforms.
+- Separate experimental integrations from stable documented interfaces.
+
+## Security
 
 See [`.github/SECURITY.md`](.github/SECURITY.md) for the vulnerability reporting policy.
 
----
+## Contributing
 
-## 🤝 Contributing
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for contribution guidance and repository standards.
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development guide, coding standards, and PR process.
-
----
-
-## 📄 License
+## License
 
 [Apache 2.0](LICENSE) © 2026 Zubin Qayam
